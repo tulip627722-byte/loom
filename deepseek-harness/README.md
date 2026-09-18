@@ -1,4 +1,4 @@
-# Tulip DeepSeek Harness
+# Loom DeepSeek Harness
 
 React 工作台 + TypeScript 本地服务 + DeepSeek Harness 原生运行时。保留对话入口，承载讨论、Coding、项目连续性、个人管理与能力扩展。第一版不引入 LangGraph，不移植整个 OnvoClaw。
 
@@ -28,7 +28,7 @@ API Key 由 Harness 的本地设置页保存，不要提交到 Git。
 | 工作数据 | `server/store.ts`：SQLite WAL、项目/任务/运行/方案/产出/待办/安排/通知/草稿、事件游标 |
 | 管理与调度 | `server/service.ts`：上下文、同项目串行、唯一触发键、状态对账、草稿确认、迁移 |
 | 可读记忆 | `server/files.ts`：Markdown、版本冲突检查、写前备份、路径校验 |
-| Agent 能力桥 | `server/tulip-plugin.mjs`：原生 context/work/skill_draft 工具 |
+| Agent 能力桥 | `server/loom-plugin.mjs`：原生 context/work/skill_draft 工具 |
 | 能力装配 | `server/presets.ts`：工作与 Skill 草稿两种原生 preset，不修改第三方包 |
 | 本地入口 | `server/main.ts`：同源 HTTP、静态托管、事件恢复、业务接口 |
 | 工作台 | UI `src/Workbench.jsx`：Today、会话、确认、协作者、方案和记忆面板 |
@@ -39,11 +39,11 @@ API Key 由 Harness 的本地设置页保存，不要提交到 Git。
 
 ## 本地数据
 
-默认 `~/TulipData`，可用 `TULIP_DATA_DIR` 指定；Harness 使用已有 `DSH_HOME`（默认 `~/.dsh`）。
+默认 `~/LoomData`，可用 `LOOM_DATA_DIR` 指定；Harness 使用已有 `DSH_HOME`（默认 `~/.dsh`）。
 
 ```text
-TulipData/
-  state/tulip.sqlite        工作数据与事件
+LoomData/
+  state/loom.sqlite        工作数据与事件
   memory/MEMORY.md          可直接编辑的个人偏好
   memory/projects/<id>/    overview.md / decisions.md / progress.md
   memory/.history/         修改前内容备份

@@ -26,7 +26,7 @@ export function SettingsPanel({model,state,onMemory,onModels,onImport}) {
     <section aria-labelledby="settings-local">
       <h3 id="settings-local">记忆与存储</h3>
       <div className="tu-settings-group">
-        <button className="tu-setting-row tu-setting-link" onClick={onMemory}><span className="tu-setting-label"><FileText size={18}/><span>个人记忆<small>查看和编辑 Tulip 对你的了解</small></span></span><CaretRight size={15}/></button>
+        <button className="tu-setting-row tu-setting-link" onClick={onMemory}><span className="tu-setting-label"><FileText size={18}/><span>个人记忆<small>查看和编辑 Loom 对你的了解</small></span></span><CaretRight size={15}/></button>
         <div className="tu-setting-row tu-setting-path"><span>数据文件夹</span><code>{state.dataRoot||'读取中…'}</code></div>
       </div>
     </section>
@@ -35,7 +35,7 @@ export function SettingsPanel({model,state,onMemory,onModels,onImport}) {
       <div className="tu-settings-group tu-migration-group">
         <p>换一台电脑，也能带上你的工作资料。</p>
         <div className="tu-migration-actions">
-          <a href="/tulip/export" download className="tu-settings-action"><ArrowDownTray size={17}/>导出备份</a>
+          <a href="/loom/export" download className="tu-settings-action"><ArrowDownTray size={17}/>导出备份</a>
           <label className={`tu-settings-action tu-import-action ${importing?'is-busy':''}`}><ArrowUpTray size={17}/>{importing?'正在导入…':'导入备份'}<input aria-label="导入备份" type="file" accept="application/json,.json" disabled={importing} onChange={importFile}/></label>
         </div>
         <div className="tu-security-note"><ShieldCheck size={15}/><span>不包含 API 密钥和登录凭证</span></div>
@@ -43,6 +43,6 @@ export function SettingsPanel({model,state,onMemory,onModels,onImport}) {
         {feedback&&<p className={`tu-import-feedback ${feedback.ok?'is-success':'is-error'}`} role={feedback.ok?'status':'alert'}>{feedback.text}</p>}
       </div>
     </section>
-    <footer>Tulip · 个人工作台</footer>
+    <footer>Loom · 个人工作台</footer>
   </div>;
 }

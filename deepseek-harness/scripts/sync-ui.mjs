@@ -11,9 +11,9 @@ const target = resolve(harnessRoot, "node_modules/@deepseek-ai/dsh-web-frontend/
 try {
   await access(resolve(source, "index.html"), constants.R_OK);
 } catch {
-  throw new Error(`Tulip OS build is missing at ${source}; run npm --prefix ../deepseek-harness-ui run build first`);
+  throw new Error(`Loom OS build is missing at ${source}; run npm --prefix ../deepseek-harness-ui run build first`);
 }
 
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true, force: true });
-console.log(`Mounted Tulip OS into DeepSeek Harness frontend: ${target}`);
+console.log(`Mounted Loom OS into DeepSeek Harness frontend: ${target}`);

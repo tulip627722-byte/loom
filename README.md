@@ -1,10 +1,10 @@
-# Tulip Agent Workbench
+# Loom Agent Workbench
 
-<img src="deepseek-harness-ui/public/assets/deepseek-fish.svg" width="72" alt="Tulip">
+<img src="deepseek-harness-ui/public/assets/deepseek-fish.svg" width="72" alt="Loom">
 
 **一个跑在你自己电脑上的个人 Coding Agent 工作台。**
 
-Tulip 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原生运行时之上，加了一层"项目连续性 + 有界多 Agent 协作 + 工作管理"适配：保留 Harness 的终端、文件工具、Plan Mode 与事件流，同时补上 Codex 类工具普遍缺失的长期记忆、方案版本、调度、产出预览和多视角评审。
+Loom 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原生运行时之上，加了一层"项目连续性 + 有界多 Agent 协作 + 工作管理"适配：保留 Harness 的终端、文件工具、Plan Mode 与事件流，同时补上 Codex 类工具普遍缺失的长期记忆、方案版本、调度、产出预览和多视角评审。
 
 - 🖥️ React 19 工作台（对话 / Today / 项目 / 产出预览）+ TypeScript 本地服务
 - 🐋 DeepSeek Harness `0.1.0-rc.7` 作为**已安装依赖**原样使用，启动时派生 preset，**绝不修改 `node_modules`**
@@ -17,9 +17,9 @@ Tulip 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原
 
 ## 它和 Codex / Cline / 裸用 Harness 有什么不一样？
 
-| 维度 | 通用 Codex 类 Agent | Tulip 的做法 |
+| 维度 | 通用 Codex 类 Agent | Loom 的做法 |
 | --- | --- | --- |
-| **运行时** | 自带整套 Agent runtime | 不重造轮子：Harness 负责模型、终端、工具与 Plan Mode；Tulip 只做适配与业务层，不引入 LangGraph 之类的第二运行时 |
+| **运行时** | 自带整套 Agent runtime | 不重造轮子：Harness 负责模型、终端、工具与 Plan Mode；Loom 只做适配与业务层，不引入 LangGraph 之类的第二运行时 |
 | **Plan / Act** | 前端模拟开关，或仅靠提示词约束 | 读取 Harness **原生、可回放的 plan projection**；`exit_plan_mode` 的方案是一张独立审阅卡，**你不点确认就不会执行** |
 | **多 Agent** | 可无限派生、上下文互相复制、容易跑出 N 个互不关联的回答 | **有界双 Agent 评审**：委派深度锁死 1 层、每次评审最多 2 个子 Agent（插件 guard 强制，失败启动也占名额）；两个 Agent 只通过**一份带版本号的共享方案工作稿**交接，按 创新 → 工程评审 → 创新修订 → 工程落地 固定阶段推进 |
 | **评审之后** | 讨论记录和执行混在一个长上下文里 | 你确认方案后，自动拆成 1–4 个**带依赖 DAG 的独立执行会话**；子会话只拿到最终决策摘要、工程交接和自己的执行项，不复制整段讨论 |
@@ -47,13 +47,13 @@ Tulip 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原
 2. **工程 Agent**：可行性、关键风险、最多 3 条修改意见
 3. 原创新 Agent 吸收评审，产出修订稿
 4. 原工程 Agent 写落地计划，并附上 1–4 个结构化执行项（读/写模式、依赖关系、交付物、是否需要预览）
-5. Tulip 汇总共识与待确认项
+5. Loom 汇总共识与待确认项
 
 四个章节必须按序写入同一份工作稿（服务端校验阶段顺序与修订号，字数与证据检查次数也有上限）。**你确认后**，执行项才各自创建独立会话、按依赖图串行/并发推进，进度在「执行会话」面板实时可见。
 
 ### 3. 创建你自己的 Skill
 
-「创建 Skill」进入专用 preset：Agent 先通过选择题澄清用途与边界，再提交 Markdown 草稿。草稿出现在对话里，你可以直接编辑内容，确认保存后才安装到 `~/TulipData/skills/<name>/SKILL.md`。
+「创建 Skill」进入专用 preset：Agent 先通过选择题澄清用途与边界，再提交 Markdown 草稿。草稿出现在对话里，你可以直接编辑内容，确认保存后才安装到 `~/LoomData/skills/<name>/SKILL.md`。
 
 ### 4. 个人连续性
 
@@ -65,13 +65,13 @@ Tulip 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原
 
 ## 架构
 
-两个相邻工程，由一个启动器统一拉起（Tulip 工作台 `3080` + 原生 Harness `3081` + 隔离预览 `3082`）：
+两个相邻工程，由一个启动器统一拉起（Loom 工作台 `3080` + 原生 Harness `3081` + 隔离预览 `3082`）：
 
 | 层 | 位置 | 职责 |
 | --- | --- | --- |
 | 运行适配 | `deepseek-harness/server/harness.ts` | HTTP RPC、WebSocket mux 事件、选择题/审批应答、断线重连 |
 | 能力装配 | `deepseek-harness/server/presets.ts` | 启动时从 Harness 标准 preset 派生出「工作」「Skill 设计」两个原生 preset，委派深度 1 层，不碰依赖包 |
-| Agent 能力桥 | `deepseek-harness/server/tulip-plugin.mjs` | 原生 `tulip_context` / `tulip_work` / `tulip_skill_draft` 工具 + 子 Agent 数量 guard |
+| Agent 能力桥 | `deepseek-harness/server/loom-plugin.mjs` | 原生 `loom_context` / `loom_work` / `loom_skill_draft` 工具 + 子 Agent 数量 guard |
 | 管理与调度 | `deepseek-harness/server/service.ts` | 上下文检索、同项目串行、唯一触发键、状态对账、评审结算、草稿确认、迁移 |
 | 工作数据 | `deepseek-harness/server/store.ts` | Node 内置 SQLite（WAL）：项目/任务/运行/方案/产出/待办/安排/通知/草稿 + 事件游标 |
 | 可读记忆 | `deepseek-harness/server/files.ts` | Markdown 读写、版本冲突检查、写前备份、路径越界与符号链接拦截 |
@@ -84,9 +84,9 @@ Tulip 在 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) 原
 浏览器 (React, SSE)
    │  /api/* 同源代理（白名单 RPC）
    ▼
-Tulip 服务 :3080 ──HTTP RPC / WS mux──▶ 原生 Harness :3081（模型·终端·工具）
+Loom 服务 :3080 ──HTTP RPC / WS mux──▶ 原生 Harness :3081（模型·终端·工具）
    │                                       │
-   ├─ SQLite (~/TulipData/state)           └─ tulip-bridge 插件（带 guard）
+   ├─ SQLite (~/LoomData/state)           └─ loom-bridge 插件（带 guard）
    ├─ Markdown 记忆/Skills/产出
    └─ 预览服务 :3082（沙箱 iframe）
 ```
@@ -115,14 +115,14 @@ API Key 只写入 Harness 本地凭证系统（默认 `~/.dsh`），不要提交
 
 | 变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `TULIP_DATA_DIR` | `~/TulipData` | 工作数据、记忆、Skills、产出 |
+| `LOOM_DATA_DIR` | `~/LoomData` | 工作数据、记忆、Skills、产出 |
 | `DSH_HOME` | `~/.dsh` | Harness 配置与凭证 |
-| `TULIP_PORT` | `3080` | 工作台端口 |
-| `TULIP_HARNESS_PORT` | `3081` | 原生 Harness 端口 |
+| `LOOM_PORT` | `3080` | 工作台端口 |
+| `LOOM_HARNESS_PORT` | `3081` | 原生 Harness 端口 |
 
 ```text
-~/TulipData/
-  state/tulip.sqlite          工作数据与事件流
+~/LoomData/
+  state/loom.sqlite          工作数据与事件流
   memory/MEMORY.md            可直接编辑的个人偏好
   memory/projects/<id>/       overview.md / decisions.md / progress.md
   memory/.history/            写前自动备份
@@ -154,6 +154,6 @@ npm test
 
 ## 致谢与许可
 
-- [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh)：MIT，作为 npm 依赖随其自身许可分发，Tulip 不修改其文件。
+- [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh)：MIT，作为 npm 依赖随其自身许可分发，Loom 不修改其文件。
 - React / Vite / Mermaid 等依赖保留各自许可。
 - 架构分层曾参考 odt/team-agent 的思路；Codex、Cline、Kit 仅作公开设计参考，均无源码复制。完整来源与许可边界见 [`deepseek-harness/THIRD_PARTY.md`](deepseek-harness/THIRD_PARTY.md)。

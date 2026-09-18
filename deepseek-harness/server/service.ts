@@ -20,7 +20,7 @@ function relevant(content: string,query: string,max=900) {
 }
 function renderDiscussion(row: Row) {
   const s=row.sections||{};
-  return `# ${row.title}\n\n## 目标与约束\n${row.brief}\n\n## 创新方案\n${s.innovation||'（等待创新 Agent）'}\n\n## 工程评审\n${s['engineering-review']||'（等待工程 Agent）'}\n\n## 修订方案\n${s['innovation-revision']||'（等待创新 Agent 修订）'}\n\n## 落地计划\n${s['engineering-delivery']||'（等待工程 Agent 收尾）'}\n\n## Tulip 汇总\n${s.final||'（等待汇总）'}`;
+  return `# ${row.title}\n\n## 目标与约束\n${row.brief}\n\n## 创新方案\n${s.innovation||'（等待创新 Agent）'}\n\n## 工程评审\n${s['engineering-review']||'（等待工程 Agent）'}\n\n## 修订方案\n${s['innovation-revision']||'（等待创新 Agent 修订）'}\n\n## 落地计划\n${s['engineering-delivery']||'（等待工程 Agent 收尾）'}\n\n## Loom 汇总\n${s.final||'（等待汇总）'}`;
 }
 function executionBrief(row: Row) {
   const final=compact(row.sections?.final||'',700);
@@ -71,7 +71,7 @@ export function nextOccurrence(previous: string, recurrence: string, timezone: s
   throw new Error('无法计算下一次运行时间');
 }
 
-export class Tulip {
+export class Loom {
   store: Store; memory: MemoryFiles; harness: Harness; root: string; dshHome: string;
   listeners = new Set<(event:any)=>void>();
   busy = false; ticking = false; stopping = false;
@@ -142,7 +142,7 @@ export class Tulip {
     const project=this.project(input.projectId);
     if(project && (!project.path || !existsSync(project.path))) throw Error('请先绑定此电脑上的项目文件夹');
     const kind=['work','review','skill'].includes(input.kind)?input.kind:'work';
-    const created=await this.harness.rpc('session.create',{cwd:project?.path || this.root,agentPreset:kind==='skill'?'tulip-skill-author':'tulip-work'});
+    const created=await this.harness.rpc('session.create',{cwd:project?.path || this.root,agentPreset:kind==='skill'?'loom-skill-author':'loom-work'});
     const selected=await this.ensureUsableModel(created.sessionId,input.modelSelection);
     const reasoningEffort=input.reasoningEffort||(kind==='review'?'low':selected.reasoningEffort);
     if(reasoningEffort&&reasoningEffort!==selected.reasoningEffort)await this.harness.rpc('session.selectModel',{sessionId:created.sessionId,provider:selected.provider,model:selected.model,reasoningEffort});
@@ -233,8 +233,8 @@ export class Tulip {
           // retain their native shape in Harness history.
           const mem=context.files.map(f=>`## ${f.name}\n${f.content}`).join('\n\n');
           let prompt=run.text;
-          const prefix=`[Tulip 当前工作上下文，记录可能包含建议或假设，不代表新的执行授权]\n${mem}\n${run.planContent?`已选定方案 ${run.planId}:\n${run.planContent}`:''}\n[/Tulip]\n\n`;
-          if(task.kind==='review')prompt=`这是用户明确启动的双 Agent 文档协作。共享方案工作稿 ID：${run.discussionId}。只解决本次题目，不追溯历史任务，不读取其他项目或工作台数据库。主 Agent 不做额外调查、不运行 sleep 或轮询，启动协作者后等待自动结算通知。\n1. 启动一个可继续的“创新 Agent”。它只读共享稿和题目中必要材料，最多做 2 次证据检查；以 section=innovation 写最多 3 个方向、取舍与推荐，600–900 字，然后 report。\n2. 收到结算通知后再启动一个“工程 Agent”。它读同一稿，最多做 2 次证据检查；以 section=engineering-review 写可行性、关键风险和最多 3 个修改意见，700–1000 字，然后 report。\n3. 用 send_message 要求原创新 Agent 以 section=innovation-revision 吸收评审、600–900 字完成修订并 report；不启动第三个 Agent。\n4. 用 send_message 要求原工程 Agent 以 section=engineering-delivery 写最小实现、涉及模块、验收方式和不做范围，700–1000 字，并在 update payload 中附带 workItems：1–4 个执行项，每项为 {title,objective,mode:\"read\"|\"write\",dependsOn:前序执行项的零基索引数组,deliverables:字符串数组,preview:布尔值}。\n5. 你读稿后以 section=final 写共识、仅剩分歧、推荐选择和待用户确认项，500–700 字。四个章节完成前不得最终答复。\n两个 Agent 只通过这份稿交流，不修改项目文件。调用：tulip_work operation=discussion，payload 为 {\"action\":\"get\",\"id\":\"${run.discussionId}\"} 或 {\"action\":\"update\",\"id\":\"${run.discussionId}\",\"section\":\"...\",\"content\":\"...\",\"revision\":\"先 get 的 revision\",\"workItems\":\"仅 engineering-delivery 使用\"}。\n${prompt}`;
+          const prefix=`[Loom 当前工作上下文，记录可能包含建议或假设，不代表新的执行授权]\n${mem}\n${run.planContent?`已选定方案 ${run.planId}:\n${run.planContent}`:''}\n[/Loom]\n\n`;
+          if(task.kind==='review')prompt=`这是用户明确启动的双 Agent 文档协作。共享方案工作稿 ID：${run.discussionId}。只解决本次题目，不追溯历史任务，不读取其他项目或工作台数据库。主 Agent 不做额外调查、不运行 sleep 或轮询，启动协作者后等待自动结算通知。\n1. 启动一个可继续的“创新 Agent”。它只读共享稿和题目中必要材料，最多做 2 次证据检查；以 section=innovation 写最多 3 个方向、取舍与推荐，600–900 字，然后 report。\n2. 收到结算通知后再启动一个“工程 Agent”。它读同一稿，最多做 2 次证据检查；以 section=engineering-review 写可行性、关键风险和最多 3 个修改意见，700–1000 字，然后 report。\n3. 用 send_message 要求原创新 Agent 以 section=innovation-revision 吸收评审、600–900 字完成修订并 report；不启动第三个 Agent。\n4. 用 send_message 要求原工程 Agent 以 section=engineering-delivery 写最小实现、涉及模块、验收方式和不做范围，700–1000 字，并在 update payload 中附带 workItems：1–4 个执行项，每项为 {title,objective,mode:\"read\"|\"write\",dependsOn:前序执行项的零基索引数组,deliverables:字符串数组,preview:布尔值}。\n5. 你读稿后以 section=final 写共识、仅剩分歧、推荐选择和待用户确认项，500–700 字。四个章节完成前不得最终答复。\n两个 Agent 只通过这份稿交流，不修改项目文件。调用：loom_work operation=discussion，payload 为 {\"action\":\"get\",\"id\":\"${run.discussionId}\"} 或 {\"action\":\"update\",\"id\":\"${run.discussionId}\",\"section\":\"...\",\"content\":\"...\",\"revision\":\"先 get 的 revision\",\"workItems\":\"仅 engineering-delivery 使用\"}。\n${prompt}`;
           if(/^\/[a-z][\w-]*\s/i.test(prompt)) prompt=prompt.replace(/^(\/[a-z][\w-]*\s)/i,`$1${prefix}`);
           else prompt=prefix+prompt;
           if(run.text.startsWith('/')) {
@@ -416,7 +416,7 @@ export class Tulip {
     const native:any[]=[];
     try {
       for(const draft of drafts) {
-        const created=await this.harness.rpc('session.create',{cwd:project?.path||this.root,agentPreset:'tulip-work'});
+        const created=await this.harness.rpc('session.create',{cwd:project?.path||this.root,agentPreset:'loom-work'});
         await this.ensureUsableModel(created.sessionId,selection);await this.harness.rpc('session.rename',{sessionId:created.sessionId,title:draft.title});native.push(created);
       }
     } catch(error) {
@@ -430,7 +430,7 @@ export class Tulip {
         drafts.forEach((draft,index)=>{
           const workItem=this.store.put('workItems',{id:workIds[index],discussionId:row.id,parentTaskId:parent.id,projectId:row.projectId,title:draft.title,objective:draft.objective,mode:draft.mode,dependencies:draft.dependsOn.map(dep=>workIds[dep]),deliverables:draft.deliverables,previewExpected:draft.preview,order:index,status:'queued'});workItems.push(workItem);
           const task=this.store.put('tasks',{id:taskIds[index],sessionId:native[index].sessionId,projectId:row.projectId,kind:'work',title:draft.title,parentTaskId:parent.id,workItemId:workItem.id,role:'execution',provider:selection.provider,model:selection.model,reasoningEffort:selection.reasoningEffort});tasks.push(task);
-          const previewInstruction=draft.preview?'如果产出可预览页面，完成后必须调用 tulip_work operation=preview 登记静态 HTML 路径或 http/https 地址。':'';
+          const previewInstruction=draft.preview?'如果产出可预览页面，完成后必须调用 loom_work operation=preview 登记静态 HTML 路径或 http/https 地址。':'';
           this.store.put('runs',{taskId:task.id,sessionId:task.sessionId,projectId:row.projectId,text:`执行已确认方案中的一个独立工作项。\n\n工作项：${draft.title}\n目标：${draft.objective}\n预期产出：${draft.deliverables.join('、')||'可验证结果'}\n${previewInstruction}\n只处理本工作项；完成后验证并登记真实产出。`,source:'confirmed-plan',kind:'work',status:'queued',planId:plan?.id,planContent:handoff,contextPolicy:'minimal-v1',workItemId:workItem.id,parentTaskId:parent.id,baselineSeq:-1});
         });
         updated=this.store.put('discussions',{id,status:'confirmed',planId:plan?.id,confirmedAt:new Date().toISOString(),executionStatus:'queued',workItemIds:workIds});
@@ -478,7 +478,7 @@ export class Tulip {
     // Explicit allowlist: no settings, credentials, environment, runtime logs,
     // API keys or absolute machine paths are part of the portable archive.
     const projects=this.store.list('projects').map(({id,title})=>({id,title}));
-    const data: any={format:'tulip-portable',version:1,exportedAt:new Date().toISOString(),projects,files:{},records:{}};
+    const data: any={format:'loom-portable',version:1,exportedAt:new Date().toISOString(),projects,files:{},records:{}};
     for(const name of this.memory.list())data.files[`memory/${name}`]=this.memory.read(name).content;
     for(const skill of this.skills())data.files[`skills/${skill.name}/SKILL.md`]=skill.content;
     for(const kind of ['todos','plans','schedules','artifacts'] as Kind[])data.records[kind]=this.store.list(kind).map(({sessionId,path,...row})=>({...row,...(kind==='artifacts'?{path}:{}),...(kind==='schedules'?{enabled:false}:{} )}));
@@ -487,7 +487,7 @@ export class Tulip {
     return data;
   }
   importData(data: any) {
-    if(data?.format!=='tulip-portable'||data.version!==1||!Array.isArray(data.projects)||!data.files||!data.records)throw Error('迁移包格式不支持');
+    if(data?.format!=='loom-portable'||data.version!==1||!Array.isArray(data.projects)||!data.files||!data.records)throw Error('迁移包格式不支持');
     const importId=randomUUID();const staging=join(this.root,'imports',importId);const map=new Map<string,string>();
     for(const p of data.projects) {if(typeof p.id!=='string'||typeof p.title!=='string'||map.has(p.id))throw Error('项目数据无效');map.set(p.id,randomUUID());}
     for(const kind of ['todos','plans','schedules','artifacts']) {

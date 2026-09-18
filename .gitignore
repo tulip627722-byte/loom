@@ -21,7 +21,7 @@ Thumbs.db
 .vscode/
 
 # local runtime data
-TulipData/
+LoomData/
 .dsh/
 *.sqlite
 *.sqlite-wal

@@ -1,9 +1,9 @@
 export async function local(path, data) {
-  const response = await fetch(`/tulip/${path}`, {method:data===undefined?'GET':'POST',headers:{'content-type':'application/json','x-tulip-client':'workbench'},...(data===undefined?{}:{body:JSON.stringify(data)})});
+  const response = await fetch(`/loom/${path}`, {method:data===undefined?'GET':'POST',headers:{'content-type':'application/json','x-loom-client':'workbench'},...(data===undefined?{}:{body:JSON.stringify(data)})});
   const result=await response.json();if(!response.ok)throw Error(result.error||`请求失败 ${response.status}`);return result;
 }
 export function watch(onEvent,onReady) {
-  const source=new EventSource('/tulip/events');
+  const source=new EventSource('/loom/events');
   source.onmessage=event=>{const data=JSON.parse(event.data);if(!data.replay)onEvent(data);};
   source.addEventListener('ready',event=>onReady(JSON.parse(event.data)));
   source.onerror=()=>onReady({connected:false});return ()=>source.close();

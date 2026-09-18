@@ -1,12 +1,12 @@
 # Architecture and source provenance
 
-Tulip's management/runtime separation was informed by odt/team-agent at 444bc40a:
+Loom's management/runtime separation was informed by odt/team-agent at 444bc40a:
 `RuntimeAdapter`, `OnvoClawRuntimeAdapter`, and `memory_bridge.py`.
 No root license was found in the inspected checkout. No Team Agent implementation
 has been copied; the local TypeScript services are independently implemented.
 
 DeepSeek Harness 0.1.0-rc.7 is used as an installed dependency, under its MIT
-license in `node_modules/@deepseek-ai/dsh/LICENSE`. The supported Tulip preset
+license in `node_modules/@deepseek-ai/dsh/LICENSE`. The supported Loom preset
 is derived at startup from its bundled standard preset. Dependency files are
 never modified by the new startup path. Its license and attribution remain
 with the installed package and must accompany any redistributed bundle.
@@ -24,5 +24,5 @@ design references only:
 - Kit (`speakeasy-api/kit`, MIT): bounded subagent handoffs and reducing repeated
   context/tool round trips.
 
-No source from those repositories is copied into Tulip. Tulip continues to use
+No source from those repositories is copied into Loom. Loom continues to use
 DeepSeek Harness APIs and projections for the actual implementation.

@@ -1,4 +1,4 @@
-// Tulip owns the same-origin facade; Harness stays independently hosted.
+// Loom owns the same-origin facade; Harness stays independently hosted.
 const API_ROOT = "/api";
 
 function rpcId() {
@@ -10,7 +10,7 @@ async function rpc(method, payload = {}, signal) {
   const id = rpcId();
   const response = await fetch(`${API_ROOT}/${method}`, {
     method: "POST",
-    headers: { "content-type": "application/json", "x-tulip-client": "workbench" },
+    headers: { "content-type": "application/json", "x-loom-client": "workbench" },
     body: JSON.stringify({
       type: "client-request",
       rpcId: id,

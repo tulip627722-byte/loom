@@ -3,16 +3,16 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Tulip,nextOccurrence } from '../server/service.ts';
+import { Loom,nextOccurrence } from '../server/service.ts';
 import { Harness,endStatus } from '../server/harness.ts';
 import { safePath,revision } from '../server/files.ts';
 
 function fixture() {
-  const root=mkdtempSync(join(tmpdir(),'tulip-test-'));
+  const root=mkdtempSync(join(tmpdir(),'loom-test-'));
   const h=new Harness('http://127.0.0.1:1');
   const calls:any[]=[];let i=0;
   h.rpc=async(method,payload={})=>{calls.push({method,payload});if(method==='session.models')return {current:{provider:'deepseek',model:'deepseek-v4-flash'}};if(method==='session.create')return {sessionId:`session-${++i}`};if(method==='session.history')return {events:[]};if(method==='session.list')return {items:[]};return {accepted:true};};
-  const app=new Tulip(root,join(root,'dsh'),h);return {root,app,h,calls};
+  const app=new Loom(root,join(root,'dsh'),h);return {root,app,h,calls};
 }
 test('draft cannot install until confirmation; revision conflicts and duplicate saves fail',()=>{
   const {app,root}=fixture();
@@ -52,7 +52,7 @@ test('schedule trigger survives restart and is claimed only once',async()=>{
   const {app,root,h}=fixture();const now=Date.now();
   app.work('schedule',{title:'remind',kind:'reminder',nextAt:new Date(now-1000).toISOString(),timezone:'Asia/Shanghai',recurrence:'once'});
   await app.tick(now);assert.equal(app.store.list('notifications').length,1);app.store.close();
-  const again=new Tulip(root,join(root,'dsh'),h);await again.tick(now+3000);assert.equal(again.store.list('notifications').length,1);again.store.close();
+  const again=new Loom(root,join(root,'dsh'),h);await again.tick(now+3000);assert.equal(again.store.list('notifications').length,1);again.store.close();
 });
 test('overdue task does not execute on wake, recurrent next occurrence advances',async()=>{
   const {app,calls}=fixture();const now=Date.now();
@@ -79,7 +79,7 @@ test('portable export excludes credentials and paths; import retains memory and 
   app.memory.write(`projects/${p.id}/overview.md`,'portable',revision(''));
   app.work('schedule',{title:'remember',kind:'reminder',nextAt:new Date().toISOString(),timezone:'Asia/Shanghai',recurrence:'daily',projectId:p.id});
   const data=app.exportData();assert.doesNotMatch(JSON.stringify(data),/never-export|\/Users\/private/);
-  const dest=new Tulip(join(root,'dest'),join(root,'dsh'),new Harness('http://127.0.0.1:1'));
+  const dest=new Loom(join(root,'dest'),join(root,'dsh'),new Harness('http://127.0.0.1:1'));
   const imported=dest.importData(data);assert.equal(dest.store.list('projects')[0].path,null);assert.equal(dest.store.list('schedules')[0].enabled,false);
   assert.equal(dest.memory.read(`projects/${imported.projectIds[0]}/overview.md`).content,'portable');dest.store.close();app.store.close();
 });
@@ -109,7 +109,7 @@ test('replayed interrupted turn emits exactly one notification',async()=>{
 });
 test('portable artifacts open after import and malformed packages do not change business records',()=>{
   const {app,root}=fixture();writeFileSync(join(root,'artifacts/result.txt'),'verified');app.work('artifact',{path:'result.txt'});
-  const data=app.exportData();const dest=new Tulip(join(root,'dest'),join(root,'dsh'),new Harness('http://127.0.0.1:1'));
+  const data=app.exportData();const dest=new Loom(join(root,'dest'),join(root,'dsh'),new Harness('http://127.0.0.1:1'));
   dest.importData(data);const artifact=dest.store.list('artifacts')[0];assert.equal(readFileSync(join(dest.root,'artifacts',artifact.path),'utf8'),'verified');
   const bad={...data,projects:[{id:'p',title:'bad'}],files:{'memory/not-markdown.txt':'bad'}};
   assert.throws(()=>dest.importData(bad));assert.equal(dest.store.list('projects').length,0);dest.store.close();app.store.close();
@@ -153,7 +153,7 @@ test('preview registration validates local HTML and classifies URLs without read
 test('HTML and Markdown artifacts become previews automatically and text edits use revisions',()=>{
   const {app,root}=fixture();mkdirSync(join(root,'artifacts/docs'),{recursive:true});
   writeFileSync(join(root,'artifacts/docs/index.html'),'<h1>HTML preview</h1>');
-  writeFileSync(join(root,'artifacts/docs/map.md'),'# Map\n\n```mermaid\nmindmap\n  root((Tulip))\n    Build\n```\n');
+  writeFileSync(join(root,'artifacts/docs/map.md'),'# Map\n\n```mermaid\nmindmap\n  root((Loom))\n    Build\n```\n');
   const html=app.work('artifact',{title:'Page',path:'docs/index.html'});const markdown=app.work('artifact',{title:'Mind map',path:'docs/map.md'});
   assert.equal(html.preview.sourceType,'static-html');assert.equal(markdown.preview.sourceType,'markdown');assert.equal(app.store.list('previews').length,2);
   const opened=app.readArtifact(markdown.id);assert.match(opened.content,/mindmap/);

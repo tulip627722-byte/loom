@@ -6,10 +6,10 @@ import { randomUUID } from 'node:crypto';
 import { preparePresets } from '../server/presets.ts';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const port=Number(process.env.TULIP_PORT||3080), harnessPort=Number(process.env.TULIP_HARNESS_PORT||3081);
+const port=Number(process.env.LOOM_PORT||3080), harnessPort=Number(process.env.LOOM_HARNESS_PORT||3081);
 const dshHome=resolve(process.env.DSH_HOME||join(homedir(),'.dsh'));
-const dataRoot=resolve(process.env.TULIP_DATA_DIR||join(homedir(),'TulipData'));
-const env={...process.env,TULIP_PORT:String(port),TULIP_HARNESS_URL:`http://127.0.0.1:${harnessPort}`,TULIP_SERVICE_URL:`http://127.0.0.1:${port}`,TULIP_BRIDGE_TOKEN:randomUUID(),TULIP_DATA_DIR:dataRoot};
+const dataRoot=resolve(process.env.LOOM_DATA_DIR||join(homedir(),'LoomData'));
+const env={...process.env,LOOM_PORT:String(port),LOOM_HARNESS_URL:`http://127.0.0.1:${harnessPort}`,LOOM_SERVICE_URL:`http://127.0.0.1:${port}`,LOOM_BRIDGE_TOKEN:randomUUID(),LOOM_DATA_DIR:dataRoot};
 const run=(args,cwd=root)=>spawn(process.execPath,args,{cwd,env,stdio:'inherit'});
 const build=run([resolve(root,'../deepseek-harness-ui/node_modules/vite/bin/vite.js'),'build'],resolve(root,'../deepseek-harness-ui'));
 const code=await new Promise(resolve=>build.on('exit',resolve));if(code!==0)process.exit(Number(code)||1);

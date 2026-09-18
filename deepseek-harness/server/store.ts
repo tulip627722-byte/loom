@@ -10,7 +10,7 @@ export class Store {
   db: DatabaseSync;
   constructor(root: string) {
     mkdirSync(join(root, 'state'), { recursive: true });
-    this.db = new DatabaseSync(join(root, 'state', 'tulip.sqlite'));
+    this.db = new DatabaseSync(join(root, 'state', 'loom.sqlite'));
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS records(kind TEXT NOT NULL, id TEXT NOT NULL, json TEXT NOT NULL, PRIMARY KEY(kind,id));
       CREATE TABLE IF NOT EXISTS triggers(schedule_id TEXT NOT NULL, due TEXT NOT NULL, run_id TEXT NOT NULL, PRIMARY KEY(schedule_id,due));

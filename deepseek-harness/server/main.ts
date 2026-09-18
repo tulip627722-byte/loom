@@ -5,19 +5,19 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { Harness } from './harness.ts';
-import { Tulip } from './service.ts';
+import { Loom } from './service.ts';
 import { safePath } from './files.ts';
 import { preparePresets } from './presets.ts';
 
 const repoRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const port=Number(process.env.TULIP_PORT||3080);
-const previewPort=Number(process.env.TULIP_PREVIEW_PORT||port+2);
-const dataRoot=resolve(process.env.TULIP_DATA_DIR||join(homedir(),'TulipData'));
+const port=Number(process.env.LOOM_PORT||3080);
+const previewPort=Number(process.env.LOOM_PREVIEW_PORT||port+2);
+const dataRoot=resolve(process.env.LOOM_DATA_DIR||join(homedir(),'LoomData'));
 const dshHome=resolve(process.env.DSH_HOME||join(homedir(),'.dsh'));
-const upstream=process.env.TULIP_HARNESS_URL||'http://127.0.0.1:3081';
-const bridgeToken=process.env.TULIP_BRIDGE_TOKEN||randomUUID();
+const upstream=process.env.LOOM_HARNESS_URL||'http://127.0.0.1:3081';
+const bridgeToken=process.env.LOOM_BRIDGE_TOKEN||randomUUID();
 preparePresets(repoRoot,dshHome,dataRoot);
-const harness=new Harness(upstream);const app=new Tulip(dataRoot,dshHome,harness);
+const harness=new Harness(upstream);const app=new Loom(dataRoot,dshHome,harness);
 const staticRoot=resolve(repoRoot,'../deepseek-harness-ui/dist/client');
 const mime:Record<string,string>={'.html':'text/html; charset=utf-8','.htm':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.ico':'image/x-icon','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf'};
 const json=(res:ServerResponse,value:any,status=200)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(value));};
@@ -41,8 +41,8 @@ const server=createServer(async(req,res)=>{
       if(req.method!=='POST'||req.headers.authorization!==`Bearer ${bridgeToken}`)return json(res,{error:'未授权'},403);
       const b=await body(req);return json(res,app.work(b.operation,b.args,b.sessionId,b.cwd,b.author));
     }
-    if(req.method!=='GET'&&req.method!=='HEAD'&&req.headers['x-tulip-client']!=='workbench')return json(res,{error:'缺少工作台请求标识'},403);
-    if(path==='/tulip/events') {
+    if(req.method!=='GET'&&req.method!=='HEAD'&&req.headers['x-loom-client']!=='workbench')return json(res,{error:'缺少工作台请求标识'},403);
+    if(path==='/loom/events') {
       res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-cache','connection':'keep-alive'});
       const send=(e:any)=>res.write(`id: ${e.seq}\ndata: ${JSON.stringify(e)}\n\n`);
       let cursor=Number(req.headers['last-event-id']||url.searchParams.get('after')||app.store.latestEventSequence());
@@ -66,45 +66,45 @@ const server=createServer(async(req,res)=>{
         } else if(method==='session.cancel')value=await app.cancel(b.payload.sessionId);
         else if(method==='session.create') {
           const project=app.store.list('projects').find(p=>p.path===b.payload.cwd||p.workspaceId===b.payload.workspaceId);
-          const task=await app.createTask({projectId:project?.id,title:'新任务'});value={sessionId:task.sessionId,agentPreset:'tulip-work'};
+          const task=await app.createTask({projectId:project?.id,title:'新任务'});value={sessionId:task.sessionId,agentPreset:'loom-work'};
         } else {value=await harness.rpc(method,b.payload);if(method==='workspace.create')await app.syncProjects();if(method==='session.selectModel')app.recordTaskModel(b.payload.sessionId,b.payload);}
         return json(res,{type:'server-response',rpcId:b.rpcId,result:{ok:true,value}});
-      } catch(e) {return json(res,{type:'server-response',rpcId:b.rpcId,result:{ok:false,error:{code:'tulip-error',message:(e as Error).message}}});}
+      } catch(e) {return json(res,{type:'server-response',rpcId:b.rpcId,result:{ok:false,error:{code:'loom-error',message:(e as Error).message}}});}
     }
-    if(path==='/tulip/state')return json(res,{...app.snapshot(),pending:[...harness.pending.values()],connected:harness.connected,dataRoot,platform:process.platform,previewOrigin:`http://127.0.0.1:${previewPort}`});
-    if(path==='/tulip/tasks'&&req.method==='POST')return json(res,await app.createTask(await body(req)));
-    if(path==='/tulip/tasks/archive'&&req.method==='POST'){const b=await body(req);return json(res,await app.setTaskArchived(b.sessionId,!!b.archived));}
-    if(path==='/tulip/discussions/confirm'&&req.method==='POST'){const b=await body(req);return json(res,await app.confirmDiscussion(b.id));}
-    if(path==='/tulip/previews'&&req.method==='POST'){const b=await body(req);return json(res,app.work('preview',b.args||b,b.sessionId));}
-    if(path==='/tulip/submit'&&req.method==='POST') {const b=await body(req);const run=await app.submit(b.sessionId,b.text,'user',b.planId);void app.dispatch();return json(res,run);}
-    if(path==='/tulip/respond'&&req.method==='POST'){const b=await body(req);return json(res,await harness.respond(b.rpcId,b.value));}
-    if(path==='/tulip/work'&&req.method==='POST'){const b=await body(req);return json(res,app.work(b.operation,b.args,b.sessionId));}
-    if(path==='/tulip/memory'&&req.method==='GET') {const name=url.searchParams.get('name');return json(res,name?app.memory.read(name):app.memory.list());}
-    if(path==='/tulip/memory'&&req.method==='POST'){const b=await body(req);const r=app.memory.write(b.name,b.content,b.revision);app.emit({type:'memory',name:b.name});return json(res,r);}
-    if(path==='/tulip/skills') {
+    if(path==='/loom/state')return json(res,{...app.snapshot(),pending:[...harness.pending.values()],connected:harness.connected,dataRoot,platform:process.platform,previewOrigin:`http://127.0.0.1:${previewPort}`});
+    if(path==='/loom/tasks'&&req.method==='POST')return json(res,await app.createTask(await body(req)));
+    if(path==='/loom/tasks/archive'&&req.method==='POST'){const b=await body(req);return json(res,await app.setTaskArchived(b.sessionId,!!b.archived));}
+    if(path==='/loom/discussions/confirm'&&req.method==='POST'){const b=await body(req);return json(res,await app.confirmDiscussion(b.id));}
+    if(path==='/loom/previews'&&req.method==='POST'){const b=await body(req);return json(res,app.work('preview',b.args||b,b.sessionId));}
+    if(path==='/loom/submit'&&req.method==='POST') {const b=await body(req);const run=await app.submit(b.sessionId,b.text,'user',b.planId);void app.dispatch();return json(res,run);}
+    if(path==='/loom/respond'&&req.method==='POST'){const b=await body(req);return json(res,await harness.respond(b.rpcId,b.value));}
+    if(path==='/loom/work'&&req.method==='POST'){const b=await body(req);return json(res,app.work(b.operation,b.args,b.sessionId));}
+    if(path==='/loom/memory'&&req.method==='GET') {const name=url.searchParams.get('name');return json(res,name?app.memory.read(name):app.memory.list());}
+    if(path==='/loom/memory'&&req.method==='POST'){const b=await body(req);const r=app.memory.write(b.name,b.content,b.revision);app.emit({type:'memory',name:b.name});return json(res,r);}
+    if(path==='/loom/skills') {
       const saved=app.skills();const sessionId=url.searchParams.get('sessionId');let catalog:any[]=[];let error='';
       if(sessionId)try{catalog=(await harness.rpc('skill.list',{sessionId})).skills;}catch(e){error=String(e);}
       const map=new Map(saved.map(s=>[s.name,s]));for(const s of catalog)map.set(s.name,{...map.get(s.name),...s,status:'loadable',category:map.get(s.name)?.category||'development'});
       return json(res,{items:[...map.values()],catalogError:error});
     }
-    if(path==='/tulip/drafts/confirm'&&req.method==='POST'){const b=await body(req);return json(res,app.approveDraft(b.id,b.revision,b.content));}
-    if(path==='/tulip/drafts/cancel'&&req.method==='POST'){const b=await body(req);const d=app.store.get('drafts',b.id);if(!d||d.status!=='draft')throw Error('草稿已处理');const r=app.store.put('drafts',{id:b.id,status:'cancelled'});app.emit({type:'draft',draft:r});return json(res,r);}
-    if(path==='/tulip/todos/migrate'&&req.method==='POST') {
+    if(path==='/loom/drafts/confirm'&&req.method==='POST'){const b=await body(req);return json(res,app.approveDraft(b.id,b.revision,b.content));}
+    if(path==='/loom/drafts/cancel'&&req.method==='POST'){const b=await body(req);const d=app.store.get('drafts',b.id);if(!d||d.status!=='draft')throw Error('草稿已处理');const r=app.store.put('drafts',{id:b.id,status:'cancelled'});app.emit({type:'draft',draft:r});return json(res,r);}
+    if(path==='/loom/todos/migrate'&&req.method==='POST') {
       const b=await body(req);if(!Array.isArray(b.items))throw Error('待办格式无效');
       if(!app.store.get('settings','legacy-todos'))app.store.transaction(()=>{for(const t of b.items){if(/^task-[123]$/.test(t.id))continue;if(typeof t.text==='string'&&t.text.trim())app.work('todo',{text:t.text,done:!!t.done});}app.store.put('settings',{id:'legacy-todos',migrated:true});});
       return json(res,{ok:true});
     }
-    if(path==='/tulip/notification/read'&&req.method==='POST'){const b=await body(req);if(!app.store.get('notifications',b.id))throw Error('通知不存在');return json(res,app.store.put('notifications',{id:b.id,read:true}));}
-    if(path==='/tulip/schedule/toggle'&&req.method==='POST'){const b=await body(req);const s=app.store.get('schedules',b.id);if(!s)throw Error('安排不存在');return json(res,app.store.put('schedules',{id:b.id,enabled:!!b.enabled}));}
-    if(path==='/tulip/schedule/run'&&req.method==='POST') {const b=await body(req);const s=app.store.get('schedules',b.id);if(!s||s.kind!=='task')throw Error('执行安排不存在');const t=await app.createTask({projectId:s.projectId,title:s.title});const r=await app.submit(t.sessionId,s.prompt,'manual-schedule');void app.dispatch();return json(res,r);}
-    if(path==='/tulip/projects/rebind'&&req.method==='POST') {const b=await body(req);const project=app.project(b.id)!;if(typeof b.path!=='string'||!existsSync(b.path)||!statSync(b.path).isDirectory())throw Error('请选择存在的文件夹');const ws=await harness.rpc('workspace.create',{path:resolve(b.path)});const p=app.store.put('projects',{id:project.id,path:resolve(b.path),workspaceId:ws.workspace?.workspaceId||ws.workspaceId});app.emit({type:'changed'});return json(res,p);}
-    if(path==='/tulip/export') {res.setHeader('content-disposition','attachment; filename="tulip-migration.json"');return json(res,app.exportData());}
-    if(path==='/tulip/import'&&req.method==='POST')return json(res,app.importData(await body(req)));
-    if(path==='/tulip/artifact'&&req.method==='GET') {
+    if(path==='/loom/notification/read'&&req.method==='POST'){const b=await body(req);if(!app.store.get('notifications',b.id))throw Error('通知不存在');return json(res,app.store.put('notifications',{id:b.id,read:true}));}
+    if(path==='/loom/schedule/toggle'&&req.method==='POST'){const b=await body(req);const s=app.store.get('schedules',b.id);if(!s)throw Error('安排不存在');return json(res,app.store.put('schedules',{id:b.id,enabled:!!b.enabled}));}
+    if(path==='/loom/schedule/run'&&req.method==='POST') {const b=await body(req);const s=app.store.get('schedules',b.id);if(!s||s.kind!=='task')throw Error('执行安排不存在');const t=await app.createTask({projectId:s.projectId,title:s.title});const r=await app.submit(t.sessionId,s.prompt,'manual-schedule');void app.dispatch();return json(res,r);}
+    if(path==='/loom/projects/rebind'&&req.method==='POST') {const b=await body(req);const project=app.project(b.id)!;if(typeof b.path!=='string'||!existsSync(b.path)||!statSync(b.path).isDirectory())throw Error('请选择存在的文件夹');const ws=await harness.rpc('workspace.create',{path:resolve(b.path)});const p=app.store.put('projects',{id:project.id,path:resolve(b.path),workspaceId:ws.workspace?.workspaceId||ws.workspaceId});app.emit({type:'changed'});return json(res,p);}
+    if(path==='/loom/export') {res.setHeader('content-disposition','attachment; filename="loom-migration.json"');return json(res,app.exportData());}
+    if(path==='/loom/import'&&req.method==='POST')return json(res,app.importData(await body(req)));
+    if(path==='/loom/artifact'&&req.method==='GET') {
       return json(res,app.readArtifact(url.searchParams.get('id')||''));
     }
-    if(path==='/tulip/artifact/save'&&req.method==='POST'){const b=await body(req);return json(res,app.saveArtifact(b.id,b.content,b.revision));}
-    if(path.startsWith('/tulip/'))return json(res,{error:'接口不存在'},404);
+    if(path==='/loom/artifact/save'&&req.method==='POST'){const b=await body(req);return json(res,app.saveArtifact(b.id,b.content,b.revision));}
+    if(path.startsWith('/loom/'))return json(res,{error:'接口不存在'},404);
     if(req.method!=='GET'&&req.method!=='HEAD')return json(res,{error:'不支持的请求'},405);
     const name=decodeURIComponent(path).replace(/^\/+/, '')||'index.html';
     let file=safePath(staticRoot,name);if(!existsSync(file)||!statSync(file).isFile()) {
@@ -131,7 +131,7 @@ const previewServer=createServer((req,res)=>{
 });
 
 for(const run of app.store.list('runs').filter(r=>r.status==='preparing'))app.store.put('runs',{id:run.id,status:'interrupted',error:'准备过程中服务重启，未自动重试'});
-server.listen(port,'127.0.0.1',()=>console.log(`Tulip: http://127.0.0.1:${port} · data: ${dataRoot}`));
+server.listen(port,'127.0.0.1',()=>console.log(`Loom: http://127.0.0.1:${port} · data: ${dataRoot}`));
 previewServer.listen(previewPort,'127.0.0.1',()=>console.log(`Preview: http://127.0.0.1:${previewPort}`));
 void harness.consume(frame=>app.onFrame(frame));
 void app.syncProjects().catch(e=>console.error('项目同步暂不可用:',e.message));

@@ -1,5 +1,5 @@
 {
-  "name": "tulip-deepseek-harness-local",
+  "name": "loom-deepseek-harness-local",
   "version": "0.1.0",
   "private": true,
   "description": "Local DeepSeek Harness deployment and customization workspace",

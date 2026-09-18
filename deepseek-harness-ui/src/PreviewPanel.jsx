@@ -2,7 +2,7 @@ import {Children,useEffect,useId,useMemo,useState} from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {ArrowClockwise,ArrowSquareOut,Check,Copy,FileCode,Globe,PencilSimple,X} from '@phosphor-icons/react';
-import {local} from './tulipClient.js';
+import {local} from './loomClient.js';
 import {isMindmap,parseMindmap} from './mermaid.js';
 import './markdown.css';
 import './preview.css';
@@ -25,7 +25,7 @@ async function renderMermaid(chart,id) {
 }
 
 function MermaidDiagram({chart}) {
-  const baseId=`tulip-${useId().replace(/[^a-z0-9]/gi,'')}`,[error,setError]=useState(''),[svg,setSvg]=useState(''),[fit,setFit]=useState(true);
+  const baseId=`loom-${useId().replace(/[^a-z0-9]/gi,'')}`,[error,setError]=useState(''),[svg,setSvg]=useState(''),[fit,setFit]=useState(true);
   useEffect(()=>{let alive=true;setError('');setSvg('');const id=`${baseId}-${++mermaidRenderSequence}`;
     const timer=setTimeout(()=>renderMermaid(chart,id).then(result=>{if(alive)setSvg(result.svg);}).catch(reason=>{if(alive)setError(reason?.message||'图表语法有误');}),0);
     return()=>{alive=false;clearTimeout(timer);};

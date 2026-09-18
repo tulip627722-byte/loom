@@ -27,14 +27,14 @@ export default defineConfig({
     },
     proxy: {
       "/api": harnessProxy,
-      "/tulip": harnessProxy,
+      "/loom": harnessProxy,
       "/harness-api": harnessProxy,
     },
   },
   preview: {
     proxy: {
       "/api": harnessProxy,
-      "/tulip": harnessProxy,
+      "/loom": harnessProxy,
       "/harness-api": harnessProxy,
     },
   },
