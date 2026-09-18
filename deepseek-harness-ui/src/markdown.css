@@ -1,0 +1,7 @@
+.tu-markdown{font-size:14px;line-height:1.85;overflow-wrap:anywhere;color:#456382}
+.wb .tu-markdown p{white-space:normal;margin:10px 0}
+.tu-markdown h1,.tu-markdown h2,.tu-markdown h3{font-size:16px;margin:20px 0 10px;font-weight:600}
+.tu-markdown ul,.tu-markdown ol{padding-left:22px;margin:10px 0}
+.tu-markdown pre{overflow:auto;white-space:pre;background:#edf4fb;border:1px solid #d9e6f2;padding:14px;border-radius:9px;font:12px/1.65 ui-monospace,monospace}
+.tu-markdown code{font:12px ui-monospace,monospace;background:#edf4fb;padding:2px 4px;border-radius:3px}
+.tu-markdown pre code{padding:0}.tu-markdown table{border-collapse:collapse;display:block;overflow:auto}.tu-markdown td,.tu-markdown th{border:1px solid #dce7f2;padding:7px 10px;text-align:left}.tu-markdown a{color:#3b78a5}.tu-markdown blockquote{border-left:3px solid #bad3ea;margin:12px 0;padding-left:14px;color:#71879c}

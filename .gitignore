@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+build/
+
+# local env & secrets
+.env
+.env.*
+*.local
+
+# logs
+npm-debug.log*
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# local runtime data
+TulipData/
+.dsh/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

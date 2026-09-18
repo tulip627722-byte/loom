@@ -1,0 +1,226 @@
+.tu-mermaid {
+  min-height: 220px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.tu-mermaid-loading {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  color: #8299b2;
+  font-size: 11px;
+}
+
+.tu-mermaid-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 9px;
+  border-bottom: 1px solid #e4ecf5;
+  background: #f7faff;
+}
+
+.tu-mermaid-toolbar span {
+  flex: 1;
+  color: #6886a5;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tu-mermaid-toolbar button {
+  padding: 4px 7px;
+  border-radius: 5px;
+  color: #8196ad;
+  font-size: 9px;
+}
+
+.tu-mermaid-toolbar button.is-active {
+  background: #e0ecfa;
+  color: #396c9f;
+}
+
+.tu-mermaid-viewport {
+  min-width: 0;
+  min-height: 260px;
+  max-height: 560px;
+  overflow: auto;
+  padding: 14px;
+  background: #fff;
+}
+
+.tu-mermaid .tu-mermaid-canvas {
+  display: block;
+  min-width: 0;
+  margin: auto;
+}
+
+.tu-mermaid-canvas.is-fit {
+  width: 100%;
+}
+
+.tu-mermaid-canvas.is-natural {
+  width: 1100px;
+}
+
+.tu-mermaid-canvas svg {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: auto;
+}
+
+.tu-mermaid .tu-mermaid-error {
+  padding: 14px;
+}
+
+.tu-mindmap {
+  margin: 18px 0;
+  overflow: hidden;
+  border: 1px solid #d8e6f4;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.tu-mindmap > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-bottom: 1px solid #e1eaf4;
+  background: #f2f7fd;
+}
+
+.tu-mindmap > header > span {
+  display: grid;
+  flex: 1;
+}
+
+.tu-mindmap > header strong {
+  color: #426c96;
+  font-size: 11px;
+}
+
+.tu-mindmap > header small {
+  color: #92a5ba;
+  font-size: 8px;
+}
+
+.tu-mindmap > header button {
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #dfeafb;
+  color: #4976a4;
+  font-size: 9px;
+}
+
+.tu-mindmap-tree {
+  max-height: 560px;
+  overflow: auto;
+  padding: 16px 13px 28px;
+  background: linear-gradient(180deg,#fff 0%,#f8fbff 100%);
+}
+
+.tu-mindmap-tree ul {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 19px;
+  list-style: none;
+}
+
+.tu-mindmap-tree > ul {
+  padding-left: 0;
+}
+
+.tu-mindmap-tree ul ul::before {
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  left: 6px;
+  width: 1px;
+  background: #bdd2e8;
+  content: '';
+}
+
+.tu-mindmap-tree li {
+  position: relative;
+}
+
+.tu-mindmap-tree ul ul > li::before {
+  position: absolute;
+  top: 13px;
+  left: -13px;
+  width: 12px;
+  height: 1px;
+  background: #bdd2e8;
+  content: '';
+}
+
+.tu-mindmap-tree summary,
+.tu-mindmap-leaf > span {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  gap: 7px;
+  padding: 5px 8px;
+  border: 1px solid #d8e5f2;
+  border-radius: 7px;
+  background: #fff;
+  color: #496b8d;
+  font-size: 10px;
+  line-height: 1.4;
+  list-style: none;
+  cursor: pointer;
+}
+
+.tu-mindmap-tree summary::-webkit-details-marker {
+  display: none;
+}
+
+.tu-mindmap-tree summary::before {
+  color: #7298bf;
+  content: '›';
+  transition: transform .15s ease;
+}
+
+.tu-mindmap-tree details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.tu-mindmap-tree summary small {
+  min-width: 16px;
+  border-radius: 8px;
+  background: #eaf2fb;
+  color: #7895b2;
+  font-size: 8px;
+  text-align: center;
+}
+
+.tu-mindmap-tree details > ul {
+  margin-top: 7px;
+}
+
+.tu-mindmap-tree > ul > li > details > summary {
+  padding: 7px 10px;
+  border-color: #91b5da;
+  background: #e4f0fc;
+  color: #285b8e;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.tu-document-visual {
+  margin: -8px 0 24px;
+}
+
+.tu-document-visual > span {
+  display: block;
+  margin-bottom: -9px;
+  color: #91a5ba;
+  font-size: 8px;
+  letter-spacing: .08em;
+}

@@ -1,0 +1,43 @@
+.wb .wb-overlay:has(.tu-settings-dialog){align-items:center;padding:24px}
+.wb .tu-dialog.tu-settings-dialog{width:min(580px,calc(100vw - 32px));padding:24px 28px 18px;background:#f5f8fd;border:1px solid #dbe5f1;border-radius:18px;box-shadow:0 24px 80px #25476b24;max-height:calc(100dvh - 48px)}
+.wb .tu-settings-dialog>header{margin:0 0 5px;align-items:center}
+.wb .tu-settings-dialog>header h2{font-size:20px;font-weight:600;letter-spacing:-.5px;color:#29496d}
+.wb .tu-settings-dialog>header button{display:grid;place-items:center;padding:6px;margin:0;background:transparent;color:#7c91ab;border-radius:7px}
+.wb .tu-settings-dialog>header button:hover{background:#e5edf8;color:#315881}
+.wb .tu-settings .tu-settings-intro{font-size:12px;color:#7890aa;margin:0 0 24px;line-height:1.6}
+.wb .tu-settings section{margin-top:16px}
+.wb .tu-settings section h3{font-size:11px;font-weight:600;color:#7a8ea6;letter-spacing:.6px;margin:0 0 8px 3px}
+.tu-settings-group{background:#ffffffc9;border:1px solid #e0e8f2;border-radius:11px;overflow:hidden}
+.wb .tu-settings .tu-setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:49px;padding:13px 16px;font-size:13px;color:#43607f;margin:0;width:100%;border-radius:0;background:transparent;text-align:left}
+.tu-setting-row+.tu-setting-row{border-top:1px solid #edf1f7}
+.tu-setting-value{display:flex;align-items:center;justify-content:flex-end;gap:10px;font-size:12px;text-align:right}
+.tu-setting-value strong{font-weight:500;color:#355575}
+.wb .tu-settings .tu-setting-value small{font-size:11px;color:#8497af}
+.tu-connection-tag{font-size:10px;border-radius:5px;padding:3px 6px;background:#edf1f7;color:#7a8ca4;white-space:nowrap}
+.tu-connection-tag.is-online{background:#edf5f5;color:#5c8c89}
+.tu-setting-label{display:flex;gap:11px;align-items:center}
+.tu-setting-label>svg{color:#7196be}
+.wb .tu-settings .tu-setting-label small{margin-top:4px;font-size:11px;color:#8a9bb0}
+.wb .tu-settings button.tu-setting-link:hover{background:#f2f7fd}
+.wb .tu-settings .tu-setting-path{align-items:flex-start;flex-direction:column;gap:7px}
+.tu-setting-path code{font:11px/1.5 ui-monospace,SFMono-Regular,monospace;color:#7b90a9;overflow-wrap:anywhere;user-select:text}
+.tu-migration-group{padding:15px 16px}
+.wb .tu-settings .tu-migration-group>p{font-size:12px;color:#6e86a1;margin:0 0 13px;line-height:1.6}
+.tu-migration-actions{display:flex;gap:10px}
+.wb .tu-settings .tu-settings-action{position:relative;display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid #cedef0;border-radius:7px;background:#edf4fd;color:#476e9b;padding:9px 15px;font:12px/1.2 inherit;text-decoration:none;cursor:pointer;min-height:37px}
+.wb .tu-settings .tu-import-action{background:#fff;border-color:#e0e7f1;color:#637e9c}
+.tu-settings-action:hover{filter:brightness(.98)}
+.wb .tu-settings .tu-settings-action{font-family:inherit;font-size:12px;line-height:1.2}
+.tu-import-action input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.tu-settings-action:focus-visible,.tu-import-action:focus-within{outline:2px solid #769bda;outline-offset:3px}
+.tu-import-action.is-busy{opacity:.5;cursor:wait}
+.tu-security-note{display:flex;align-items:center;gap:6px;font-size:10px;color:#8b9eb4;margin-top:13px}
+.wb .tu-settings details{border:0;padding:12px 0 0;font-size:11px;color:#8498af}
+.tu-settings details summary{cursor:pointer;width:fit-content}
+.wb .tu-settings details p{font-size:11px;line-height:1.65;color:#7890a9;margin:9px 0 0}
+.wb .tu-settings .tu-import-feedback{font-size:12px;margin:12px 0 0;padding:10px;border-radius:6px;background:#edf4fb}
+.tu-import-feedback.is-error{color:#a65656!important;background:#fdf0f0!important}
+.tu-settings footer{text-align:center;font-size:10px;letter-spacing:.6px;color:#a0b0c3;padding-top:20px}
+.wb .cx-user{display:block;min-width:0}
+.wb .cx-user p{width:100%;min-width:0}
+@media(max-width:600px){.wb .tu-settings-dialog{padding:20px;max-height:calc(100dvh - 32px)}.tu-setting-value{flex-wrap:wrap;gap:5px}.tu-migration-actions{flex-wrap:wrap}}
