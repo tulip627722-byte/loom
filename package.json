@@ -1,0 +1,30 @@
+{
+  "name": "loom",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:runtime": "npm --workspace @loom/runtime run dev",
+    "dev:ui": "npm --workspace @loom/desktop run dev",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "desktop": "npm --workspace @loom/desktop run tauri"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@loom/runtime",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/server.mjs --external:node:sqlite",
+    "migrate": "tsx src/migrate-cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@loom/shared": "0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "esbuild": "^0.25.12",
+    "tsx": "^4.20.6",
+    "typescript": "^7.0.2"
+  }
+}

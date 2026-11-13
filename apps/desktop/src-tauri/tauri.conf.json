@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Loom",
+  "version": "0.2.0",
+  "identifier": "app.loom.desktop",
+  "build": {
+    "beforeDevCommand": "npm --prefix ../.. run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm --prefix ../.. run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{
+      "title": "Loom",
+      "width": 1280,
+      "height": 820,
+      "minWidth": 860,
+      "minHeight": 620,
+      "center": true,
+      "decorations": true,
+      "transparent": false
+    }],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:*; img-src 'self' asset: data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "resources": [
+      "../../../packages/runtime/dist/server.mjs"
+    ],
+    "windows": { "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true } }
+  }
+}
