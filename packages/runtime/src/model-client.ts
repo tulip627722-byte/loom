@@ -51,7 +51,7 @@ export class ModelClient {
       stream: true,
       store: false,
     };
-    const response = await this.fetchResponse(`${input.model.baseUrl.replace(/\/$/, '')}/v1/responses`, body, input.model, input.signal);
+    const response = await this.fetchResponse(this.endpoint(input.model.baseUrl, '/responses'), body, input.model, input.signal);
     if (!response.body) throw new Error('模型没有返回流式响应体');
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -114,7 +114,7 @@ export class ModelClient {
       tools: input.tools?.map(tool => ({ type: 'function', function: tool })),
       stream: false,
     };
-    const payload = await this.request(`${input.model.baseUrl.replace(/\/$/, '')}/v1/chat/completions`, body, input.model, input.signal) as Record<string, unknown>;
+    const payload = await this.request(this.endpoint(input.model.baseUrl, '/chat/completions'), body, input.model, input.signal) as Record<string, unknown>;
     const choice = (payload.choices as Array<Record<string, unknown>> | undefined)?.[0];
     const message = choice?.message as Record<string, unknown> | undefined;
     const toolCalls = (message?.tool_calls as Array<Record<string, unknown>> | undefined || []).map(item => {
@@ -138,7 +138,7 @@ export class ModelClient {
       messages: input.messages,
       tools: input.tools?.map(tool => ({ name: tool.name, description: tool.description, input_schema: tool.parameters })),
     };
-    const payload = await this.request(`${input.model.baseUrl.replace(/\/$/, '')}/v1/messages`, body, input.model, input.signal, { 'anthropic-version': '2023-06-01' }) as Record<string, unknown>;
+    const payload = await this.request(this.endpoint(input.model.baseUrl, '/messages'), body, input.model, input.signal, { 'anthropic-version': '2023-06-01' }) as Record<string, unknown>;
     const content = Array.isArray(payload.content) ? payload.content as Array<Record<string, unknown>> : [];
     return {
       id: payload.id ? String(payload.id) : undefined,
@@ -156,7 +156,7 @@ export class ModelClient {
       contents: input.messages.map(message => ({ role: message.role === 'assistant' ? 'model' : 'user', parts: [{ text: message.content }] })),
       tools: input.tools?.length ? [{ functionDeclarations: input.tools.map(tool => ({ name: tool.name, description: tool.description, parameters: tool.parameters })) }] : undefined,
     };
-    const url = `${input.model.baseUrl.replace(/\/$/, '')}/v1beta/models/${encodeURIComponent(input.model.modelId)}:generateContent?key=${encodeURIComponent(secret)}`;
+    const url = `${this.endpoint(input.model.baseUrl, '/v1beta')}/models/${encodeURIComponent(input.model.modelId)}:generateContent?key=${encodeURIComponent(secret)}`;
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: input.signal || AbortSignal.timeout(300_000) });
     if (!response.ok) throw new Error(`模型请求失败：HTTP ${response.status} ${await response.text()}`.slice(0, 1000));
     const payload = await response.json() as Record<string, unknown>;
@@ -189,6 +189,12 @@ export class ModelClient {
     });
     if (!response.ok) throw new Error(`模型请求失败：HTTP ${response.status} ${await response.text()}`.slice(0, 1000));
     return response;
+  }
+
+  private endpoint(baseUrl: string, suffix: string): string {
+    const base = baseUrl.replace(/\/+$/, '').replace(/\/v1$/, '');
+    if (suffix === '/v1beta') return `${base}/v1beta`;
+    return `${base}/v1${suffix}`;
   }
 
   private parseArguments(value: unknown): Record<string, unknown> {
